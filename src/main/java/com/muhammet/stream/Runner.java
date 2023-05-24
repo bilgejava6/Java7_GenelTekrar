@@ -3,9 +3,7 @@ package com.muhammet.stream;
 import com.muhammet.listeler.Musteri;
 
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -14,7 +12,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Runner {
-
+        private static List<Musteri> musteriler = Arrays.asList(
+            new Musteri("Muhammet","Karakaya","İstanbul"),
+            new Musteri("Ahmet","Karakaya","Ankara"),
+            new Musteri("Demet","Karakaya","İzmir"),
+            new Musteri("Turan","Karakaya","Bolu"),
+            new Musteri("Kenan","Karakaya","İstanbul"),
+            new Musteri("Bahar","Karakaya","Samsun"),
+            new Musteri("Emel","Karakaya","İstanbul"),
+            new Musteri("Esin","Karakaya","Hatay"),
+            new Musteri("Tuğba","Karakaya","İzmir"),
+            new Musteri("Nuran","Karakaya","Bolu"),
+            new Musteri("Canan","Karakaya","İstanbul")
+            );
     public static void main(String[] args) {
         Stream<Integer> sayilarStream = Stream.of(1,2,43,3,5,32);
         Stream<Integer> tekStream = Stream.of(1);
@@ -116,6 +126,68 @@ public class Runner {
                 Stream.of("Muhammet","Muhammet","Mehmet","Ali","Ali");
         isimlerStream.distinct().forEach(System.out::println);
         System.out.println("******************");
+
+        Stream<Integer> itSayi = Stream.iterate(1, x-> x*2);// 1, 2, 4, 8, 16,
+        int i =1;
+        itSayi.skip(5*i)
+                .limit(3)
+                .forEach(System.out::println);
+
+        /**
+         * Musteri, Satis, Post v.s. gibi nesneleriniz var ise
+         * nesnelerin içinden aranılan değerleri bulmak ve bir liste içine atmak
+         * kullanışlı olacaktır. Neden?
+         * Örnek;
+         * elimizde 5.000 adet atılmış post var bunların kimler tarafından atıldığını
+         * bulmak istiyoruz. bu nedenle post içindeki userid leri DB den sorgulatarak
+         * bu işlemi çözmeye çalıştık diyelim. bu işlem için toplamda, 5.000 defa DB ye
+         * istek atmak zorundayız.
+         * elimizde buluan postların içindeki kullanıcı id lerini bir liste içine
+         * atabiliriz. bu sayede DB ye sadece 1 defa istek atarız.
+         */
+        List<String> musteriAdlari = musteriler
+                                .stream().map(m-> m.ad).collect(Collectors.toList());
+        // select * from tblsatis where musteriAd in ("ahmet","canan","temel")
+        //DB.findByAdIn(musteriAdlari);
+
+        /**
+         * Sorting
+         */
+        isimlerStream =
+                Stream.of("Muhammet","Ahmet","Mehmet","Ali","Veli");
+     //   isimlerStream.sorted().forEach(System.out::println); // a...Z
+      //  isimlerStream.sorted(Comparator.reverseOrder()).forEach(System.out::println); // z...a
+
+        System.out.println("******************");
+        musteriler.forEach(System.out::println);
+        System.out.println("******************");
+        musteriler.stream()
+                //.sorted(Comparator.comparing(Musteri::getSehir))
+                //.sorted(Comparator.comparing(Musteri::getSehir).reversed())
+                .sorted(Comparator.comparing(m-> m.sehir))
+                .forEach(System.out::println);
+        System.out.println("******************");
+        /**
+         * Tür Dönüşümleri
+         */
+        Map<String, List<Musteri>> sehirMusteriMap =
+                musteriler.stream().collect(
+                        //Collectors.groupingBy(m-> m.sehir)
+                        Collectors.groupingBy(Musteri::getSehir)
+                );
+        HashMap<String,List<Musteri>> sehirMusteriTreeMap =
+                musteriler.stream().collect(
+                        Collectors.groupingBy(
+                                Musteri::getSehir,
+                                HashMap::new,
+                                Collectors.toList()
+                        )
+                );
+        System.out.println(sehirMusteriMap);
+        System.out.println("******************");
+
+        // sehirMusteriMap.containsKey("İstanbul"); ilk olarak kontrol önemli
+        sehirMusteriMap.get("İstanbul").forEach(System.out::println);
 
     }
 
